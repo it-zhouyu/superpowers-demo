@@ -1,6 +1,7 @@
 package com.example.auth.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -61,5 +62,23 @@ class JwtServiceTest {
     @Test
     void validateToken_shouldReturnFalse_whenEmpty() {
         assertFalse(jwtService.validateToken(""));
+    }
+
+    @Test
+    void validateToken_shouldReturnFalse_whenNull() {
+        assertFalse(jwtService.validateToken(null));
+    }
+
+    @Test
+    void validateToken_shouldReturnFalse_whenExpired() {
+        String testSecret = "dGVzdC1zZWNyZXQta2V5LWZvci1qdW5pdC10ZXN0aW5nLW9ubHk=";
+        JwtService expiredService = new JwtService(testSecret, 0);
+        String token = expiredService.generateToken(1L, "13800138000");
+        assertFalse(expiredService.validateToken(token));
+    }
+
+    @Test
+    void parseToken_shouldThrow_whenInvalid() {
+        assertThrows(JwtException.class, () -> jwtService.parseToken("invalid.token.string"));
     }
 }

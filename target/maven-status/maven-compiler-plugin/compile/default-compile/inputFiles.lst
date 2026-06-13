@@ -7,4 +7,5 @@
 /Users/dadudu/idea/vibe-coding-vip/superpowers-demo/src/main/java/com/example/auth/entity/User.java
 /Users/dadudu/idea/vibe-coding-vip/superpowers-demo/src/main/java/com/example/auth/exception/BusinessException.java
 /Users/dadudu/idea/vibe-coding-vip/superpowers-demo/src/main/java/com/example/auth/repository/UserRepository.java
+/Users/dadudu/idea/vibe-coding-vip/superpowers-demo/src/main/java/com/example/auth/service/JwtService.java
 /Users/dadudu/idea/vibe-coding-vip/superpowers-demo/src/main/java/com/example/auth/service/SmsService.java
