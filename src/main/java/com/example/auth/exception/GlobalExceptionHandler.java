@@ -1,6 +1,7 @@
 package com.example.auth.exception;
 
 import com.example.auth.dto.ErrorResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -45,9 +47,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException e) {
+        log.warn("认证失败：{}", e.getMessage());
         ErrorResponse error = ErrorResponse.builder()
                 .code(401)
-                .message("认证失败：" + e.getMessage())
+                .message("认证失败")
                 .timestamp(LocalDateTime.now())
                 .build();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
@@ -65,6 +68,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
+        log.error("未处理的异常", e);
         ErrorResponse error = ErrorResponse.builder()
                 .code(500)
                 .message("服务器内部错误")

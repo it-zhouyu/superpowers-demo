@@ -3,6 +3,7 @@ package com.example.auth.service;
 import com.example.auth.dto.LoginRequest;
 import com.example.auth.dto.LoginResponse;
 import com.example.auth.entity.User;
+import com.example.auth.exception.BusinessException;
 import com.example.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,16 @@ public class AuthService {
     private final UserRepository userRepository;
     private final SmsService smsService;
     private final JwtService jwtService;
+
+    public LoginResponse getCurrentUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("用户不存在"));
+        return LoginResponse.builder()
+                .userId(user.getId())
+                .phone(user.getPhone())
+                .nickname(user.getNickname())
+                .build();
+    }
 
     @Transactional
     public LoginResponse loginOrRegister(LoginRequest request) {

@@ -1,9 +1,6 @@
 package com.example.auth.controller;
 
 import com.example.auth.dto.*;
-import com.example.auth.entity.User;
-import com.example.auth.exception.BusinessException;
-import com.example.auth.repository.UserRepository;
 import com.example.auth.service.AuthService;
 import com.example.auth.service.SmsService;
 import jakarta.validation.Valid;
@@ -19,7 +16,6 @@ public class AuthController {
 
     private final SmsService smsService;
     private final AuthService authService;
-    private final UserRepository userRepository;
 
     @PostMapping("/send-code")
     public ResponseEntity<SendCodeResponse> sendCode(@Valid @RequestBody SendCodeRequest request) {
@@ -39,16 +35,7 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<LoginResponse> me(Authentication authentication) {
         Long userId = (Long) authentication.getPrincipal();
-        String phone = (String) authentication.getDetails();
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException("用户不存在"));
-
-        LoginResponse response = LoginResponse.builder()
-                .userId(user.getId())
-                .phone(user.getPhone())
-                .nickname(user.getNickname())
-                .build();
+        LoginResponse response = authService.getCurrentUser(userId);
         return ResponseEntity.ok(response);
     }
 }
