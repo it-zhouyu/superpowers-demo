@@ -6,10 +6,11 @@ import com.example.auth.entity.User;
 import com.example.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Service
@@ -20,14 +21,11 @@ public class AuthService {
     private final SmsService smsService;
     private final JwtService jwtService;
 
-    private static final Random RANDOM = new Random();
-
     @Transactional
     public LoginResponse loginOrRegister(LoginRequest request) {
         smsService.verifyCode(request.getPhone(), request.getCode());
 
-        User user = userRepository.findByPhone(request.getPhone())
-                .orElseGet(() -> createUser(request.getPhone()));
+        User user = findOrCreateUser(request.getPhone());
 
         String token = jwtService.generateToken(user.getId(), user.getPhone());
 
@@ -41,14 +39,27 @@ public class AuthService {
                 .build();
     }
 
+    private User findOrCreateUser(String phone) {
+        return userRepository.findByPhone(phone)
+                .orElseGet(() -> createUser(phone));
+    }
+
     private User createUser(String phone) {
-        String nickname = "用户" + (100000 + RANDOM.nextInt(900000));
+        String nickname = "用户" + (100000 + ThreadLocalRandom.current().nextInt(900000));
         User user = User.builder()
                 .phone(phone)
                 .nickname(nickname)
                 .build();
-        user = userRepository.save(user);
-        log.info("新用户注册：phone={}, userId={}, nickname={}", phone, user.getId(), nickname);
-        return user;
+        try {
+            user = userRepository.save(user);
+            log.info("新用户注册：phone={}, userId={}, nickname={}", phone, user.getId(), nickname);
+            return user;
+        } catch (DataIntegrityViolationException e) {
+            // 并发情况下，两个请求同时通过 findByPhone 检查，数据库唯一索引会拒绝重复插入
+            // 捕获后重新查询即可
+            log.warn("并发创建用户，重新查询：phone={}", phone);
+            return userRepository.findByPhone(phone)
+                    .orElseThrow(() -> e);
+        }
     }
 }
