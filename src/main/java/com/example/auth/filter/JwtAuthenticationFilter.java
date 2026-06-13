@@ -36,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 Claims claims = jwtService.parseToken(token);
                 Long userId = Long.parseLong(claims.getSubject());
-                String phone = claims.get("phone", String.class);
+                String email = claims.get("email", String.class);
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 null,
                                 List.of(new SimpleGrantedAuthority("ROLE_USER"))
                         );
-                authentication.setDetails(phone);
+                authentication.setDetails(email);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (JwtException | NumberFormatException e) {
                 log.warn("JWT Token 解析失败：{}", e.getMessage());

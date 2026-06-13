@@ -15,7 +15,7 @@
     <artifactId>auth-demo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>auth-demo</name>
-    <description>手机号验证码登录注册 Demo</description>
+    <description>邮箱验证码登录注册 Demo</description>
 
     <properties>
         <java.version>17</java.version>

@@ -25,7 +25,7 @@ class AuthServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private SmsService smsService;
+    private EmailService emailService;
 
     private JwtService jwtService;
     private AuthService authService;
@@ -34,16 +34,16 @@ class AuthServiceTest {
     void setUp() {
         String testSecret = "dGVzdC1zZWNyZXQta2V5LWZvci1qdW5pdC10ZXN0aW5nLW9ubHk=";
         jwtService = new JwtService(testSecret, 3600000);
-        authService = new AuthService(userRepository, smsService, jwtService);
+        authService = new AuthService(userRepository, emailService, jwtService);
     }
 
     @Test
-    void loginOrRegister_shouldCreateNewUser_whenPhoneNotExists() {
+    void loginOrRegister_shouldCreateNewUser_whenEmailNotExists() {
         LoginRequest request = new LoginRequest();
-        request.setPhone("13800138000");
+        request.setEmail("test@example.com");
         request.setCode("123456");
 
-        when(userRepository.findByPhone("13800138000")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User user = invocation.getArgument(0);
             user.setId(1L);
@@ -53,40 +53,40 @@ class AuthServiceTest {
         LoginResponse response = authService.loginOrRegister(request);
 
         assertNotNull(response.getToken());
-        assertEquals("13800138000", response.getPhone());
+        assertEquals("test@example.com", response.getEmail());
         assertTrue(response.getNickname().startsWith("用户"));
         verify(userRepository).save(any(User.class));
     }
 
     @Test
-    void loginOrRegister_shouldReturnExistingUser_whenPhoneExists() {
+    void loginOrRegister_shouldReturnExistingUser_whenEmailExists() {
         LoginRequest request = new LoginRequest();
-        request.setPhone("13800138000");
+        request.setEmail("test@example.com");
         request.setCode("123456");
 
         User existingUser = User.builder()
                 .id(1L)
-                .phone("13800138000")
+                .email("test@example.com")
                 .nickname("已有用户")
                 .build();
-        when(userRepository.findByPhone("13800138000")).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(existingUser));
 
         LoginResponse response = authService.loginOrRegister(request);
 
         assertNotNull(response.getToken());
         assertEquals(1L, response.getUserId());
-        assertEquals("13800138000", response.getPhone());
+        assertEquals("test@example.com", response.getEmail());
         assertEquals("已有用户", response.getNickname());
         verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
-    void loginOrRegister_shouldCallSmsVerify() {
+    void loginOrRegister_shouldCallEmailVerify() {
         LoginRequest request = new LoginRequest();
-        request.setPhone("13800138000");
+        request.setEmail("test@example.com");
         request.setCode("123456");
 
-        when(userRepository.findByPhone("13800138000")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User user = invocation.getArgument(0);
             user.setId(1L);
@@ -94,21 +94,21 @@ class AuthServiceTest {
         });
 
         authService.loginOrRegister(request);
-        verify(smsService).verifyCode("13800138000", "123456");
+        verify(emailService).verifyCode("test@example.com", "123456");
     }
 
     @Test
-    void loginOrRegister_shouldThrow_whenSmsVerifyFails() {
+    void loginOrRegister_shouldThrow_whenEmailVerifyFails() {
         LoginRequest request = new LoginRequest();
-        request.setPhone("13800138000");
+        request.setEmail("test@example.com");
         request.setCode("000000");
 
         doThrow(new BusinessException("验证码错误"))
-                .when(smsService).verifyCode(anyString(), anyString());
+                .when(emailService).verifyCode(anyString(), anyString());
 
         BusinessException exception = assertThrows(BusinessException.class,
                 () -> authService.loginOrRegister(request));
         assertEquals("验证码错误", exception.getMessage());
-        verify(userRepository, never()).findByPhone(anyString());
+        verify(userRepository, never()).findByEmail(anyString());
     }
 }
