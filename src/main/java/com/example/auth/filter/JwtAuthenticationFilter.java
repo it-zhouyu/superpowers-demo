@@ -2,6 +2,7 @@ package com.example.auth.filter;
 
 import com.example.auth.service.JwtService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,18 +33,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = extractToken(request);
 
         if (StringUtils.hasText(token) && jwtService.validateToken(token)) {
-            Claims claims = jwtService.parseToken(token);
-            Long userId = Long.parseLong(claims.getSubject());
-            String phone = claims.get("phone", String.class);
+            try {
+                Claims claims = jwtService.parseToken(token);
+                Long userId = Long.parseLong(claims.getSubject());
+                String phone = claims.get("phone", String.class);
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            userId,
-                            null,
-                            List.of(new SimpleGrantedAuthority("ROLE_USER"))
-                    );
-            authentication.setDetails(phone);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userId,
+                                null,
+                                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                        );
+                authentication.setDetails(phone);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } catch (JwtException | NumberFormatException e) {
+                log.warn("JWT Token 解析失败：{}", e.getMessage());
+            }
         }
 
         filterChain.doFilter(request, response);
