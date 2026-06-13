@@ -11,6 +11,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -25,6 +27,10 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "未认证");
+                        }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/send-code", "/api/login").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
