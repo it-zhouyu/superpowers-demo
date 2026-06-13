@@ -4,8 +4,8 @@ import com.example.auth.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Service
@@ -15,7 +15,6 @@ public class SmsService {
     private static final long SEND_INTERVAL_MS = 60 * 1000;
 
     private final ConcurrentHashMap<String, VerificationCode> codeStore = new ConcurrentHashMap<>();
-    private final Random random = new Random();
 
     public void sendCode(String phone) {
         VerificationCode existing = codeStore.get(phone);
@@ -65,7 +64,7 @@ public class SmsService {
     }
 
     private String generateCode() {
-        int code = 100000 + random.nextInt(900000);
+        int code = 100000 + ThreadLocalRandom.current().nextInt(900000);
         return String.valueOf(code);
     }
 
