@@ -1,0 +1,9 @@
+/Users/dadudu/idea/vibe-coding-vip/superpowers-demo/src/main/java/com/example/auth/AuthApplication.java
+/Users/dadudu/idea/vibe-coding-vip/superpowers-demo/src/main/java/com/example/auth/dto/ErrorResponse.java
+/Users/dadudu/idea/vibe-coding-vip/superpowers-demo/src/main/java/com/example/auth/dto/LoginRequest.java
+/Users/dadudu/idea/vibe-coding-vip/superpowers-demo/src/main/java/com/example/auth/dto/LoginResponse.java
+/Users/dadudu/idea/vibe-coding-vip/superpowers-demo/src/main/java/com/example/auth/dto/SendCodeRequest.java
+/Users/dadudu/idea/vibe-coding-vip/superpowers-demo/src/main/java/com/example/auth/dto/SendCodeResponse.java
+/Users/dadudu/idea/vibe-coding-vip/superpowers-demo/src/main/java/com/example/auth/entity/User.java
+/Users/dadudu/idea/vibe-coding-vip/superpowers-demo/src/main/java/com/example/auth/exception/BusinessException.java
+/Users/dadudu/idea/vibe-coding-vip/superpowers-demo/src/main/java/com/example/auth/repository/UserRepository.java
