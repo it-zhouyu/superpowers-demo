@@ -2,7 +2,7 @@ package com.example.auth.controller;
 
 import com.example.auth.dto.*;
 import com.example.auth.service.AuthService;
-import com.example.auth.service.SmsService;
+import com.example.auth.service.EmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final SmsService smsService;
+    private final EmailService emailService;
     private final AuthService authService;
 
     @PostMapping("/send-code")
     public ResponseEntity<SendCodeResponse> sendCode(@Valid @RequestBody SendCodeRequest request) {
-        smsService.sendCode(request.getPhone());
+        emailService.sendCode(request.getEmail());
         SendCodeResponse response = SendCodeResponse.builder()
                 .message("验证码发送成功")
                 .build();

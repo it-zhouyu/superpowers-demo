@@ -20,37 +20,37 @@ class JwtServiceTest {
 
     @Test
     void generateToken_shouldReturnValidToken() {
-        String token = jwtService.generateToken(1L, "13800138000");
+        String token = jwtService.generateToken(1L, "test@example.com");
         assertNotNull(token);
         assertFalse(token.isEmpty());
     }
 
     @Test
     void parseToken_shouldReturnCorrectClaims() {
-        String token = jwtService.generateToken(1L, "13800138000");
+        String token = jwtService.generateToken(1L, "test@example.com");
         Claims claims = jwtService.parseToken(token);
 
         assertEquals("1", claims.getSubject());
-        assertEquals("13800138000", claims.get("phone", String.class));
+        assertEquals("test@example.com", claims.get("email", String.class));
     }
 
     @Test
     void getUserIdFromToken_shouldReturnCorrectUserId() {
-        String token = jwtService.generateToken(1L, "13800138000");
+        String token = jwtService.generateToken(1L, "test@example.com");
         Long userId = jwtService.getUserIdFromToken(token);
         assertEquals(1L, userId);
     }
 
     @Test
-    void getPhoneFromToken_shouldReturnCorrectPhone() {
-        String token = jwtService.generateToken(1L, "13800138000");
-        String phone = jwtService.getPhoneFromToken(token);
-        assertEquals("13800138000", phone);
+    void getEmailFromToken_shouldReturnCorrectEmail() {
+        String token = jwtService.generateToken(1L, "test@example.com");
+        String email = jwtService.getEmailFromToken(token);
+        assertEquals("test@example.com", email);
     }
 
     @Test
     void validateToken_shouldReturnTrue_whenValid() {
-        String token = jwtService.generateToken(1L, "13800138000");
+        String token = jwtService.generateToken(1L, "test@example.com");
         assertTrue(jwtService.validateToken(token));
     }
 
@@ -73,7 +73,7 @@ class JwtServiceTest {
     void validateToken_shouldReturnFalse_whenExpired() {
         String testSecret = "dGVzdC1zZWNyZXQta2V5LWZvci1qdW5pdC10ZXN0aW5nLW9ubHk=";
         JwtService expiredService = new JwtService(testSecret, 0);
-        String token = expiredService.generateToken(1L, "13800138000");
+        String token = expiredService.generateToken(1L, "test@example.com");
         assertFalse(expiredService.validateToken(token));
     }
 

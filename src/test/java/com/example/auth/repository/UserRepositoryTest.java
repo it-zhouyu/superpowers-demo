@@ -16,30 +16,30 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    void findByPhone_shouldReturnUser_whenPhoneExists() {
+    void findByEmail_shouldReturnUser_whenEmailExists() {
         User user = User.builder()
-                .phone("13800138000")
+                .email("test@example.com")
                 .nickname("测试用户")
                 .build();
         userRepository.save(user);
 
-        Optional<User> found = userRepository.findByPhone("13800138000");
+        Optional<User> found = userRepository.findByEmail("test@example.com");
 
         assertTrue(found.isPresent());
-        assertEquals("13800138000", found.get().getPhone());
+        assertEquals("test@example.com", found.get().getEmail());
         assertEquals("测试用户", found.get().getNickname());
     }
 
     @Test
-    void findByPhone_shouldReturnEmpty_whenPhoneNotExists() {
-        Optional<User> found = userRepository.findByPhone("13900139000");
+    void findByEmail_shouldReturnEmpty_whenEmailNotExists() {
+        Optional<User> found = userRepository.findByEmail("notexist@example.com");
         assertTrue(found.isEmpty());
     }
 
     @Test
     void save_shouldAutoGenerateId() {
         User user = User.builder()
-                .phone("13800138000")
+                .email("test@example.com")
                 .nickname("测试用户")
                 .build();
         User saved = userRepository.save(user);

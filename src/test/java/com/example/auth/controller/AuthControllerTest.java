@@ -4,7 +4,7 @@ import com.example.auth.dto.LoginRequest;
 import com.example.auth.dto.LoginResponse;
 import com.example.auth.dto.SendCodeRequest;
 import com.example.auth.service.AuthService;
-import com.example.auth.service.SmsService;
+import com.example.auth.service.EmailService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,15 +30,15 @@ class AuthControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private SmsService smsService;
+    private EmailService emailService;
 
     @MockBean
     private AuthService authService;
 
     @Test
-    void sendCode_shouldReturn200_whenPhoneValid() throws Exception {
+    void sendCode_shouldReturn200_whenEmailValid() throws Exception {
         SendCodeRequest request = new SendCodeRequest();
-        request.setPhone("13800138000");
+        request.setEmail("test@example.com");
 
         mockMvc.perform(post("/api/send-code")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -46,32 +46,32 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("验证码发送成功"));
 
-        verify(smsService).sendCode("13800138000");
+        verify(emailService).sendCode("test@example.com");
     }
 
     @Test
-    void sendCode_shouldReturn400_whenPhoneInvalid() throws Exception {
+    void sendCode_shouldReturn400_whenEmailInvalid() throws Exception {
         SendCodeRequest request = new SendCodeRequest();
-        request.setPhone("123");
+        request.setEmail("invalid-email");
 
         mockMvc.perform(post("/api/send-code")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(400))
-                .andExpect(jsonPath("$.message").value("手机号格式不正确"));
+                .andExpect(jsonPath("$.message").value("邮箱格式不正确"));
     }
 
     @Test
-    void sendCode_shouldReturn400_whenPhoneEmpty() throws Exception {
+    void sendCode_shouldReturn400_whenEmailEmpty() throws Exception {
         SendCodeRequest request = new SendCodeRequest();
-        request.setPhone("");
+        request.setEmail("");
 
         mockMvc.perform(post("/api/send-code")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("手机号不能为空"));
+                .andExpect(jsonPath("$.message").value("邮箱不能为空"));
     }
 
     @Test
@@ -79,13 +79,13 @@ class AuthControllerTest {
         LoginResponse mockResponse = LoginResponse.builder()
                 .token("test-token")
                 .userId(1L)
-                .phone("13800138000")
+                .email("test@example.com")
                 .nickname("用户123456")
                 .build();
         when(authService.loginOrRegister(any(LoginRequest.class))).thenReturn(mockResponse);
 
         LoginRequest request = new LoginRequest();
-        request.setPhone("13800138000");
+        request.setEmail("test@example.com");
         request.setCode("123456");
 
         mockMvc.perform(post("/api/login")
@@ -94,13 +94,13 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("test-token"))
                 .andExpect(jsonPath("$.userId").value(1))
-                .andExpect(jsonPath("$.phone").value("13800138000"));
+                .andExpect(jsonPath("$.email").value("test@example.com"));
     }
 
     @Test
     void login_shouldReturn400_whenCodeInvalid() throws Exception {
         LoginRequest request = new LoginRequest();
-        request.setPhone("13800138000");
+        request.setEmail("test@example.com");
         request.setCode("abc");
 
         mockMvc.perform(post("/api/login")

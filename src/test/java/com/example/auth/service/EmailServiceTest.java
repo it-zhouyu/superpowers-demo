@@ -6,65 +6,65 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SmsServiceTest {
+class EmailServiceTest {
 
-    private SmsService smsService;
+    private EmailService emailService;
 
     @BeforeEach
     void setUp() {
-        smsService = new SmsService();
+        emailService = new EmailService();
     }
 
     @Test
     void sendCode_shouldSuccess_whenFirstTime() {
-        assertDoesNotThrow(() -> smsService.sendCode("13800138000"));
+        assertDoesNotThrow(() -> emailService.sendCode("test@example.com"));
     }
 
     @Test
     void sendCode_shouldThrow_whenSendTooFrequently() {
-        smsService.sendCode("13800138000");
+        emailService.sendCode("test@example.com");
         BusinessException exception = assertThrows(BusinessException.class,
-                () -> smsService.sendCode("13800138000"));
+                () -> emailService.sendCode("test@example.com"));
         assertEquals("发送验证码太频繁，请稍后再试", exception.getMessage());
     }
 
     @Test
     void verifyCode_shouldSuccess_whenCodeCorrect() {
-        smsService.sendCode("13800138000");
-        String code = smsService.getCodeForTest("13800138000");
-        assertDoesNotThrow(() -> smsService.verifyCode("13800138000", code));
+        emailService.sendCode("test@example.com");
+        String code = emailService.getCodeForTest("test@example.com");
+        assertDoesNotThrow(() -> emailService.verifyCode("test@example.com", code));
     }
 
     @Test
     void verifyCode_shouldThrow_whenCodeNotSent() {
         BusinessException exception = assertThrows(BusinessException.class,
-                () -> smsService.verifyCode("13800138000", "123456"));
+                () -> emailService.verifyCode("test@example.com", "123456"));
         assertEquals("请先发送验证码", exception.getMessage());
     }
 
     @Test
     void verifyCode_shouldThrow_whenCodeWrong() {
-        smsService.sendCode("13800138000");
+        emailService.sendCode("test@example.com");
         BusinessException exception = assertThrows(BusinessException.class,
-                () -> smsService.verifyCode("13800138000", "000000"));
+                () -> emailService.verifyCode("test@example.com", "000000"));
         assertEquals("验证码错误", exception.getMessage());
     }
 
     @Test
     void verifyCode_shouldThrow_whenCodeExpired() {
-        smsService.sendCodeWithFixedCode("13800138000", "123456", -6 * 60 * 1000);
+        emailService.sendCodeWithFixedCode("test@example.com", "123456", -6 * 60 * 1000);
         BusinessException exception = assertThrows(BusinessException.class,
-                () -> smsService.verifyCode("13800138000", "123456"));
+                () -> emailService.verifyCode("test@example.com", "123456"));
         assertEquals("验证码已过期，请重新获取", exception.getMessage());
     }
 
     @Test
     void verifyCode_shouldDeleteCodeAfterSuccess() {
-        smsService.sendCode("13800138000");
-        String code = smsService.getCodeForTest("13800138000");
-        smsService.verifyCode("13800138000", code);
+        emailService.sendCode("test@example.com");
+        String code = emailService.getCodeForTest("test@example.com");
+        emailService.verifyCode("test@example.com", code);
         BusinessException exception = assertThrows(BusinessException.class,
-                () -> smsService.verifyCode("13800138000", code));
+                () -> emailService.verifyCode("test@example.com", code));
         assertEquals("请先发送验证码", exception.getMessage());
     }
 }
